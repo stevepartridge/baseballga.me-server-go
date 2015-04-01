@@ -1,0 +1,16 @@
+#!/bin/bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+VERSION=$1
+
+
+sleep 1
+echo "Inject Build Date"
+# inject build date
+. "$BASE_DIR/_scripts/build_date"
+
+echo "Inject Version"
+
+# inject version
+. "$BASE_DIR/_scripts/version" "$VERSION"

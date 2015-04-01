@@ -1,0 +1,11 @@
+#!/bin/bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+RESP_FILE="$BASE_DIR/api_response.go"
+RESP_TEMP="$BASE_DIR/_api_response.go"
+
+cp -f "$RESP_TEMP" "$RESP_FILE"
+rm -f "$RESP_TEMP"
+rm -f "$RESP_FILE\$RESP_TEMP"
+rm -f "$RESP_FILE\$VER_TEMP"

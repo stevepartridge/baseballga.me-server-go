@@ -1,0 +1,84 @@
+#!/bin/bash
+
+SERVICE="baseballgame"
+
+VERSION=$1
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+BUILD_DIR="$BASE_DIR/_build"
+
+if [ -d "$BUILD_DIR" ]
+then
+  echo "Build directory exists, clear it..."
+  rm -Rf $BUILD_DIR
+fi
+mkdir $BUILD_DIR
+
+. "$BASE_DIR/_scripts/pre_build" "$VERSION"
+
+
+goxc -bc="linux,darwin" 2>&1 | tee -a "$BUILD_DIR/build.log"
+
+linux_amd64="$( cat $BUILD_DIR/build.log | grep -oEi -m 1 'Artifact.* archived to .*_linux_amd64\.tar\.gz' | awk '{print $4}')"
+linux_386="$( cat $BUILD_DIR/build.log | grep -oEi -m 1 'Artifact.* archived to .*_linux_386\.tar\.gz' | awk '{print $4}')"
+linux_arm="$( cat $BUILD_DIR/build.log | grep -oEi -m 1 'Artifact.* archived to .*_linux_arm\.tar\.gz' | awk '{print $4}')"
+darwin_amd64="$( cat $BUILD_DIR/build.log | grep -oEi -m 1 'Artifact.* archived to .*_darwin_amd64\.zip' | awk '{print $4}')"
+
+cd "$BASE_DIR"
+echo " "
+echo "Moving compiled source files..."
+echo " "
+
+echo "copy: $linux_amd64"
+cp $linux_amd64 "$BUILD_DIR/$VERSION-linux_amd64.tar.gz"
+if [ -f "$linux_amd64" ]
+then
+  echo "  copied."
+fi
+
+echo "copy: $linux_arm"
+cp $linux_arm "$BUILD_DIR/$VERSION-linux_arm.tar.gz"
+if [ -f "$linux_arm" ]
+then
+  echo "  copied."
+fi
+
+echo "copy: $linux_386"
+cp $linux_386 "$BUILD_DIR/$VERSION-linux_386.tar.gz"
+if [ -f "$linux_386" ]
+then
+  echo "  copied."
+fi
+
+echo "copy: $darwin_amd64"
+cp $darwin_amd64 "$BUILD_DIR/$VERSION-darwin_amd64.zip"
+if [ -f "$darwin_amd64" ]
+then
+  echo "  copied."
+fi
+
+cd $BUILD_DIR
+for f in *
+  do
+
+    if [[ "$f" != "build.log" ]]; then
+      if [[ "$f" == *".tar.gz" ]]; then
+        tar -xvzf "$f"
+        mv "$f" "_$f"
+        fnov="${f//$VERSION\-/_}"
+        fdir="${fnov//\.tar\.gz/}"
+        echo "> $fdir"
+        cp ../_conf/upstart.conf "$SERVICE$fdir/."
+        cp ../_scripts/install.sh "$SERVICE$fdir/."
+        tar -cvzf "$VERSION-$SERVICE$fdir.tar.gz" "$SERVICE$fdir"
+        rm -fR "$SERVICE$fdir"
+        rm -f "_$f"
+      elif [[ "$f" == *".zip" ]]; then
+        echo "zip file, not supported yet"
+      fi
+    fi
+
+done
+
+. "$BASE_DIR/_scripts/post_build"
+exit 0

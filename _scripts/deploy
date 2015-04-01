@@ -1,0 +1,49 @@
+#!/bin/bash
+
+SERVICE="baseballgame"
+
+VERSION=$1
+HOSTS=$2
+
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+BUILD_DIR="$BASE_DIR/_build"
+TAR_FILE="$VERSION-$SERVICE"_linux_amd64.tar.gz
+TAR_DIR="$SERVICE"_linux_amd64
+BUILT_EXEC="$TAR_DIR/$SERVICE"
+EXEC_FILE="$SERVICE"
+USER="root"
+
+HOSTS_ARRAY=($(echo $HOSTS | tr "," "\n"))
+
+if [[ -f "$BUILD_DIR/$TAR_FILE" ]]
+then
+
+  echo ""
+  for host in "${HOSTS_ARRAY[@]}"
+  do
+    printf "Deploying to $host..."
+    scp "$BUILD_DIR/$TAR_FILE" "$USER@$host:~/."
+    printf "ok.\n"
+
+    ssh $USER@$host bash -c "'
+      printf \"Extracting build ($TAR_FILE)...\\n\"
+      tar -xvzf $TAR_FILE
+      chown -R $USER:$USER $TAR_DIR
+      printf \"ok.\\n\"
+      printf \"Install...\"
+      ./$TAR_DIR/install.sh
+      printf \"ok.\\n\"
+    '"
+  done
+
+  echo ""
+  printf "deployed."
+  echo ""
+else
+  echo ""
+  printf "Nothing to deploy."
+  echo ""
+fi
+echo ""
+exit 0

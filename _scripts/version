@@ -1,0 +1,12 @@
+#!/bin/bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+VERSION=$1
+
+VER_FILE="$BASE_DIR/api_response.go"
+VER_TEMP="$BASE_DIR/_api_response.go"
+
+# cp -f "$VER_FILE" "$VER_TEMP"
+
+sed -i '$VER_TEMP' "s/##VERSION##/${VERSION}/g" "$VER_FILE"

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+HOSTS=$1
+VERSION=$2
+
+cd "$BASE_DIR"
+./_scripts/build $VERSION
+./_scripts/deploy $VERSION $HOSTS

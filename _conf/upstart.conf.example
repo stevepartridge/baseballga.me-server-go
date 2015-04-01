@@ -1,0 +1,37 @@
+description "BaseballGa.me Service"
+author "Steve Partridge"
+
+start on (net-device-up
+          and local-filesystems
+          and runlevel [2345])
+
+stop on runlevel [06]
+
+respawn
+
+env BASEBALLGAME_DB_HOST="localhost"
+env BASEBALLGAME_DB_PORT="5432"
+env BASEBALLGAME_DB_USER="local"
+env BASEBALLGAME_DB_PASS="password"
+env BASEBALLGAME_DB_NAME="baseballgame_development"
+env BASEBALLGAME_DB_SSLMODE="disable"
+
+env PORT="3031"
+
+export BASEBALLGAME_DB_HOST
+export BASEBALLGAME_DB_PORT
+export BASEBALLGAME_DB_USER
+export BASEBALLGAME_DB_PASS
+export BASEBALLGAME_DB_NAME
+export BASEBALLGAME_DB_SSLMODE
+
+export PORT
+
+script
+
+chdir /root/baseballgame-service
+
+exec ./baseballgame both > baseballgame.log 2>&1
+# ./baseballgame api > baseballgame-api.log 2>&1
+
+end script

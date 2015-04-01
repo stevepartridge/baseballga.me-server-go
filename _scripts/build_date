@@ -1,0 +1,12 @@
+#!/bin/bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+DATE=`date`
+
+RESP_FILE="$BASE_DIR/api_response.go"
+RESP_TEMP="$BASE_DIR/_api_response.go"
+
+cp -f "$RESP_FILE" "$RESP_TEMP"
+
+sed -i '$RESP_TEMP' "s/##BUILT_AT##/${DATE}/g" "$RESP_FILE"
